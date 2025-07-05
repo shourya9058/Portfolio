@@ -46,6 +46,50 @@
     }
 }
 
+/* Download Button Feedback */
+#resume-btn.downloaded {
+    background-color: #4CAF50;
+    transform: scale(0.95);
+    transition: all 0.3s ease;
+}
+
+#resume-btn.downloading {
+    background-color: #2196F3;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+#resume-btn.downloaded:hover {
+    background-color: #45a049;
+    transform: scale(0.98);
+}
+
+#resume-btn.download-error {
+    background-color: #f44336;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes downloadPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+#resume-btn:active {
+    animation: downloadPulse 0.3s ease;
+}
+
 /* Section Styles */
 .section-padding {
     padding: 100px 0;
@@ -2202,6 +2246,22 @@ color: var(--text-primary);
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: 2rem;
     margin-top: 2.5rem;
+    justify-content: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .projects-grid {
+        grid-template-columns: minmax(280px, 400px);
+        justify-content: center;
+        padding: 0 1rem;
+    }
+    
+    .project-card {
+        margin: 0 auto;
+        width: 100%;
+        max-width: 100%;
+    }
 }
 
 .project-card {
@@ -4812,16 +4872,31 @@ backdrop-filter: blur(8px);
         display: flex;
         flex-direction: column;
         align-items: center;
-    }
-    
-    .greeting-text,
-    .name-container {
-        display: block;
         text-align: center;
     }
     
-    .comma {
-        display: inline !important;
+    .greeting-line {
+        display: block;
+        margin-bottom: 0.2rem;
+    }
+    
+    .name-line {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.3em;
+        font-size: 1.8rem;
+    }
+    
+    .greeting-text {
+        font-size: 1.5rem;
+    }
+    
+    .highlight {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: var(--accent-color);
     }
     
     .highlight {

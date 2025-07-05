@@ -160,6 +160,37 @@ function initScrollAnimations() {
 document.addEventListener('DOMContentLoaded', () => {
     initScrollAnimations();
     
+    // Add click event listener for resume download button
+    const resumeBtn = document.getElementById('resume-btn');
+    if (resumeBtn) {
+        resumeBtn.addEventListener('click', function(e) {
+            // Show loading state
+            const originalText = this.textContent;
+            this.textContent = 'Preparing...';
+            this.classList.add('downloading');
+            
+            // Small delay to show the loading state
+            setTimeout(() => {
+                // The actual download is handled by the HTML download attribute
+                // This is just for visual feedback
+                this.textContent = 'Downloading...';
+                
+                // Revert back after a short delay
+                setTimeout(() => {
+                    this.textContent = 'Download Started!';
+                    this.classList.remove('downloading');
+                    this.classList.add('downloaded');
+                    
+                    // Revert back to original text after 2 seconds
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.classList.remove('downloaded');
+                    }, 2000);
+                }, 300);
+            }, 100);
+        });
+    }
+    
     // Add animation classes to sections
     const sections = document.querySelectorAll('section');
     sections.forEach((section, index) => {
