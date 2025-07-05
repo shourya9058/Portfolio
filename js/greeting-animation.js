@@ -34,19 +34,14 @@ class GreetingAnimation {
         this.textElement.className = 'greeting-text';
         this.textElement.textContent = this.greetings[0].text;
         
-        // Create language element
-        this.langElement = document.createElement('span');
-        this.langElement.className = 'greeting-lang';
-        this.langElement.textContent = this.greetings[0].lang;
-        
-        // Clear container and append new elements
+        // Clear container and append text element
         this.container.innerHTML = '';
         this.container.appendChild(this.textElement);
-        this.container.appendChild(this.langElement);
     }
     
     updateGreeting() {
         const currentGreeting = this.greetings[this.currentIndex];
+        this.textElement.textContent = currentGreeting.text;
         
         // Create new elements for the next greeting
         const newTextElement = document.createElement('span');
