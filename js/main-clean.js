@@ -1,6 +1,7 @@
 // ==========================================
-// CUSTOM CURSOR
+// CUSTOM CURSOR - DISABLED FOR PERFORMANCE
 // ==========================================
+/*
 const cursor = document.createElement('div');
 const cursorFollower = document.createElement('div');
 cursor.classList.add('cursor');
@@ -8,18 +9,16 @@ cursorFollower.classList.add('cursor-follower');
 document.body.appendChild(cursor);
 document.body.appendChild(cursorFollower);
 
-// Update cursor position
+// Update cursor position with RAF for smooth animation
 let mouseX = 0;
 let mouseY = 0;
 let followerX = 0;
 let followerY = 0;
+let rafId = null;
 
-// Custom cursor movement with smooth following
-document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    
-    // Update cursor position
+// Smooth cursor animation loop
+function animateCursor() {
+    // Update cursor position immediately
     cursor.style.left = `${mouseX}px`;
     cursor.style.top = `${mouseY}px`;
     
@@ -32,39 +31,52 @@ document.addEventListener('mousemove', (e) => {
     
     cursorFollower.style.left = `${followerX}px`;
     cursorFollower.style.top = `${followerY}px`;
-});
+    
+    rafId = requestAnimationFrame(animateCursor);
+}
 
-// Add hover effect for clickable elements
+// Start cursor animation
+animateCursor();
+
+// Custom cursor movement - just update coordinates
+document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+}, { passive: true });
+
+// Cache hover elements for better performance
 const hoverElements = document.querySelectorAll('a, button, .project-card, .skill-item, .timeline-content, .achievement-item, .education-content, .btn, input[type="submit"], input[type="button"]');
 
 hoverElements.forEach(el => {
     el.addEventListener('mouseenter', () => {
         cursor.classList.add('hover');
         cursorFollower.classList.add('hover');
-    });
+    }, { passive: true });
     
     el.addEventListener('mouseleave', () => {
         cursor.classList.remove('hover');
         cursorFollower.classList.remove('hover');
-    });
+    }, { passive: true });
 });
 
 // Add click effect
 document.addEventListener('mousedown', () => {
     cursor.classList.add('click');
     cursorFollower.classList.add('click');
-});
+}, { passive: true });
 
 document.addEventListener('mouseup', () => {
     cursor.classList.remove('click');
     cursorFollower.classList.remove('click');
-});
+}, { passive: true });
 
-// Hide cursor on touch devices
+// Hide cursor on touch devices and cancel RAF
 if ('ontouchstart' in window || navigator.maxTouchPoints) {
     cursor.style.display = 'none';
     cursorFollower.style.display = 'none';
+    cancelAnimationFrame(rafId);
 }
+*/
 
 // ==========================================
 // MOBILE MENU TOGGLE

@@ -46,12 +46,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    // Add scroll event listener with debounce
-    let isScrolling;
+    // Add scroll event listener with improved debounce
+    let rafPending = false;
     window.addEventListener('scroll', () => {
-        window.clearTimeout(isScrolling);
-        isScrolling = setTimeout(handleScroll, 50);
-    }, false);
+        if (!rafPending) {
+            rafPending = true;
+            requestAnimationFrame(() => {
+                handleScroll();
+                rafPending = false;
+            });
+        }
+    }, { passive: true });
     
     // Check on initial load
     handleScroll();
@@ -88,10 +93,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Add parallax effect to background elements
+    // Add parallax effect to background elements with throttling
     const parallaxElements = document.querySelectorAll('.section-bg > *');
     
+    let lastParallaxScroll = 0;
     const handleParallax = () => {
+        const now = Date.now();
+        if (now - lastParallaxScroll < 16) return; // 60fps throttle
+        lastParallaxScroll = now;
+        
         const scrollPosition = window.pageYOffset;
         
         parallaxElements.forEach((element, index) => {
@@ -101,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
     
-    window.addEventListener('scroll', handleParallax);
+    window.addEventListener('scroll', handleParallax, { passive: true });
     window.addEventListener('resize', handleParallax);
 
     // Add hover effect to timeline items

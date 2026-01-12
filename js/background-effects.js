@@ -11,11 +11,12 @@ document.addEventListener('DOMContentLoaded', function() {
         createEducationEffects(educationSection);
     }
 
-    // Create floating elements with different shapes
+    // Create floating elements with different shapes (OPTIMIZED: 10 instead of 20)
     function createFloatingElements() {
-        const elementCount = 20;
+        const elementCount = 10; // Reduced from 20 for performance
         const container = document.createElement('div');
         container.className = 'floating-elements';
+        container.style.willChange = 'transform'; // GPU acceleration hint
         hero.appendChild(container);
 
         for (let i = 0; i < elementCount; i++) {
@@ -33,42 +34,44 @@ document.addEventListener('DOMContentLoaded', function() {
             const scale = Math.random() * 0.5 + 0.5; // 0.5-1.0
             const rotation = Math.random() * 360; // 0-360 degrees
             
-            // Set styles
+            // Set styles with GPU acceleration
             element.style.cssText = `
                 width: ${size}px;
                 height: ${size}px;
                 left: ${posX}%;
                 top: ${posY}%;
                 opacity: ${opacity};
-                transform: rotate(${rotation}deg) scale(${scale});
+                transform: rotate(${rotation}deg) scale(${scale}) translate3d(0, 0, 0);
                 animation: float ${duration}s ease-in-out ${delay}s infinite;
-                will-change: transform, opacity;
+                will-change: transform;
             `;
             
             container.appendChild(element);
         }
     }
 
-    // Create interactive particles
+    // Create interactive particles with performance optimization (OPTIMIZED: 10 instead of 30)
     function createInteractiveParticles() {
         const particlesContainer = document.createElement('div');
         particlesContainer.className = 'interactive-particles';
         hero.appendChild(particlesContainer);
 
-        const particleCount = 30;
+        const particleCount = 10; // Reduced from 30 for performance
         let particles = [];
         let mouseX = 0;
         let mouseY = 0;
         let mouseRadius = 100;
+        let animationId = null;
+        let isVisible = false;
 
         // Create particles
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             
-            const size = Math.random() * 4 + 1; // 1-5px
-            const posX = Math.random() * 100; // 0-100%
-            const posY = Math.random() * 100; // 0-100%
+            const size = Math.random() * 4 + 1;
+            const posX = Math.random() * 100;
+            const posY = Math.random() * 100;
             
             particle.style.cssText = `
                 width: ${size}px;
@@ -77,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 top: ${posY}%;
                 opacity: ${Math.random() * 0.3 + 0.1};
                 animation: float ${Math.random() * 20 + 10}s ease-in-out ${Math.random() * -20}s infinite;
+                will-change: transform;
             `;
             
             particles.push({
@@ -91,17 +95,23 @@ document.addEventListener('DOMContentLoaded', function() {
             particlesContainer.appendChild(particle);
         }
 
-        // Mouse move interaction
+        // Throttled mouse move interaction
+        let lastMouseUpdate = 0;
         document.addEventListener('mousemove', (e) => {
+            const now = Date.now();
+            if (now - lastMouseUpdate < 16) return; // ~60fps throttle
+            lastMouseUpdate = now;
+            
             const rect = hero.getBoundingClientRect();
             mouseX = ((e.clientX - rect.left) / rect.width) * 100;
             mouseY = ((e.clientY - rect.top) / rect.height) * 100;
-        });
+        }, { passive: true });
 
-        // Animation loop
+        // Optimized animation loop
         function animate() {
+            if (!isVisible) return;
+            
             particles.forEach(particle => {
-                // Mouse interaction
                 const dx = mouseX - particle.x;
                 const dy = mouseY - particle.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
@@ -113,27 +123,38 @@ document.addEventListener('DOMContentLoaded', function() {
                     particle.vy -= Math.sin(angle) * force;
                 }
                 
-                // Update position
                 particle.x += particle.vx * 0.1;
                 particle.y += particle.vy * 0.1;
                 
-                // Bounce off edges
                 if (particle.x < 0 || particle.x > 100) particle.vx *= -0.8;
                 if (particle.y < 0 || particle.y > 100) particle.vy *= -0.8;
                 
-                // Apply friction
                 particle.vx *= 0.98;
                 particle.vy *= 0.98;
                 
-                // Update DOM
-                particle.element.style.left = `${Math.max(-10, Math.min(110, particle.x))}%`;
-                particle.element.style.top = `${Math.max(-10, Math.min(110, particle.y))}%`;
+                // Use translate3d for GPU acceleration
+                const clampedX = Math.max(-10, Math.min(110, particle.x));
+                const clampedY = Math.max(-10, Math.min(110, particle.y));
+                particle.element.style.transform = `translate3d(${clampedX - 50}%, ${clampedY - 50}%, 0)`;
             });
             
-            requestAnimationFrame(animate);
+            animationId = requestAnimationFrame(animate);
         }
         
-        animate();
+        // Intersection Observer to pause when off-screen
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                isVisible = entry.isIntersecting;
+                if (isVisible && !animationId) {
+                    animate();
+                } else if (!isVisible && animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        observer.observe(hero);
     }
 
     // Create connecting lines
@@ -173,8 +194,8 @@ function createEducationEffects(educationSection) {
         educationSection.insertBefore(particlesContainer, educationSection.firstChild);
     }
 
-    // Particle configuration
-    const particleCount = 30;
+    // Particle configuration (OPTIMIZED: 15 instead of 30)
+    const particleCount = 15; // Reduced from 30 for performance
     const colors = ['#8a2be2', '#4b0082', '#c084fc', '#b388ff', '#c9a8ff'];
     
     // Create particles
@@ -212,18 +233,20 @@ function createEducationEffects(educationSection) {
         particlesContainer.appendChild(particle);
     }
     
-    // Add connecting lines between particles
+    // Add connecting lines between particles with heavy optimization
     function updateConnections() {
         const particles = document.querySelectorAll('.education-particle');
-        const maxDistance = 150; // Maximum distance for connection
+        const maxDistance = 150;
+        const maxConnections = 50; // Limit total connections
+        let connectionCount = 0;
         
         // Clear previous connections
         const existingLines = document.querySelectorAll('.education-connection-line');
         existingLines.forEach(line => line.remove());
         
-        // Create new connections
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
+        // Create new connections (limited)
+        for (let i = 0; i < particles.length && connectionCount < maxConnections; i++) {
+            for (let j = i + 1; j < particles.length && connectionCount < maxConnections; j++) {
                 const p1 = particles[i].getBoundingClientRect();
                 const p2 = particles[j].getBoundingClientRect();
                 
@@ -240,7 +263,7 @@ function createEducationEffects(educationSection) {
                     
                     const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
                     const length = distance;
-                    const opacity = 1 - (distance / maxDistance) * 0.9; // Fade out as distance increases
+                    const opacity = 1 - (distance / maxDistance) * 0.9;
                     
                     line.style.cssText = `
                         position: absolute;
@@ -253,24 +276,28 @@ function createEducationEffects(educationSection) {
                         transform: rotate(${angle}deg);
                         z-index: 0;
                         pointer-events: none;
+                        will-change: transform;
                     `;
                     
-                    document.body.appendChild(line);
+                    particlesContainer.appendChild(line);
+                    connectionCount++;
                 }
             }
         }
     }
     
-    // Update connections on scroll and resize
-    let isUpdating = false;
+    // Heavy throttling - only update every 500ms
+    let updateTimeout = null;
+    let lastUpdate = 0;
     function handleUpdate() {
-        if (!isUpdating) {
-            isUpdating = true;
-            requestAnimationFrame(() => {
-                updateConnections();
-                isUpdating = false;
-            });
-        }
+        const now = Date.now();
+        if (now - lastUpdate < 500) return; // Only update every 500ms
+        
+        if (updateTimeout) clearTimeout(updateTimeout);
+        updateTimeout = setTimeout(() => {
+            updateConnections();
+            lastUpdate = Date.now();
+        }, 100);
     }
     
     window.addEventListener('scroll', handleUpdate, { passive: true });

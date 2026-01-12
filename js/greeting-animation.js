@@ -2,9 +2,9 @@ class GreetingAnimation {
     constructor() {
         this.greetings = [
             { text: 'Hello', lang: 'English' },
+            { text: 'नमस्ते', lang: 'Hindi' },
             { text: 'Hola', lang: 'Spanish' },
             { text: 'Bonjour', lang: 'French' },
-            { text: 'नमस्ते', lang: 'Hindi' },
             { text: 'こんにちは', lang: 'Japanese' },
             { text: 'Ciao', lang: 'Italian' },
             { text: 'Hallo', lang: 'German' },

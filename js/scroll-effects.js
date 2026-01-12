@@ -20,16 +20,21 @@ const initScrollAnimations = () => {
     });
 };
 
-// Parallax effect for hero section
+// Parallax effect for hero section with throttling
 const initParallax = () => {
     const hero = document.querySelector('.hero');
     if (!hero) return;
 
+    let lastParallaxUpdate = 0;
     window.addEventListener('mousemove', (e) => {
+        const now = Date.now();
+        if (now - lastParallaxUpdate < 16) return; // 60fps throttle
+        lastParallaxUpdate = now;
+        
         const x = (window.innerWidth / 2 - e.pageX) / 20;
         const y = (window.innerHeight / 2 - e.pageY) / 20;
         hero.style.transform = `translate(${x}px, ${y}px)`;
-    });
+    }, { passive: true });
 };
 
 // Smooth scroll for anchor links
@@ -130,23 +135,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 100);
     
-    // Add scroll event for header
-    window.addEventListener('scroll', handleHeaderScroll);
+    // Add consolidated scroll event handler
+    let rafPending = false;
+    window.addEventListener('scroll', () => {
+        if (!rafPending) {
+            rafPending = true;
+            requestAnimationFrame(() => {
+                handleHeaderScroll();
+                rafPending = false;
+            });
+        }
+    }, { passive: true });
 });
 
-// Handle scroll events for header
+// Handle scroll events for header with RAF
 let lastScroll = 0;
 const header = document.querySelector('header');
 
-window.addEventListener('scroll', () => {
+function handleHeaderScroll() {
     const currentScroll = window.pageYOffset;
+    
+    if (!header) return;
     
     if (currentScroll <= 0) {
         header.classList.remove('scroll-up');
-        return;
-    }
-    
-    if (currentScroll > lastScroll && !header.classList.contains('scroll-down')) {
+    } else if (currentScroll > lastScroll && !header.classList.contains('scroll-down')) {
         header.classList.remove('scroll-up');
         header.classList.add('scroll-down');
     } else if (currentScroll < lastScroll && header.classList.contains('scroll-down')) {
@@ -155,4 +168,5 @@ window.addEventListener('scroll', () => {
     }
     
     lastScroll = currentScroll;
-});
+}
+
